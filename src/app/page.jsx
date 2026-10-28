@@ -10,7 +10,7 @@ import { formatCurrency } from "@/utils/formatters";
 import { getResumenMes } from "@/utils/proyecciones";
 
 export default function Home() {
-  const { user, login, registro, loginConGoogle, logout, loading: authLoading } = useAuth();
+  const { user, login, registro, loginConGoogle, logout } = useAuth();
   const { transacciones, loading: dataLoading } = useTransacciones(user?.uid);
 
   const [mostrarForm, setMostrarForm] = useState(false);
@@ -30,20 +30,20 @@ export default function Home() {
     } catch (err) {
       if (err.code === "auth/invalid-credential") setError("Correo o contraseña incorrectos.");
       else if (err.code === "auth/email-already-in-use") setError("El correo ya está registrado.");
+      else if (err.code === "auth/weak-password") setError("La contraseña debe tener al menos 6 caracteres.");
       else setError("Ocurrió un error. Intenta de nuevo.");
     } finally { setBtnLoading(false); }
   };
 
-  if (authLoading) return <div className="flex justify-center items-center h-screen bg-gray-900"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>;
-
+  // --- PANTALLA DE LOGIN / REGISTRO ---
   if (!user) {
     return (
-      <div className="flex flex-col justify-center min-h-screen p-6 pb-safe">
+      <div>
         <div className="text-center mb-10">
           <h1 className="text-4xl font-extrabold text-blue-500 mb-2">Mis Finanzas</h1>
           <p className="text-gray-400">Toma el control de tu dinero hoy</p>
         </div>
-        <form onSubmit={handleAuth} className="flex flex-col gap-4 bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700 max-w-md mx-auto w-full">
+        <form onSubmit={handleAuth} className="flex flex-col gap-4 bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700 w-full">
           <h2 className="text-xl font-semibold mb-2 text-white text-center">{isRegister ? "Crear cuenta" : "Iniciar Sesión"}</h2>
           {error && <p className="text-red-400 text-sm bg-red-900/30 p-3 rounded-lg text-center">{error}</p>}
           <input type="email" placeholder="Correo" value={email} onChange={(e) => setEmail(e.target.value)} className="p-3 rounded-xl bg-gray-700 border border-gray-600 text-white focus:border-blue-500 outline-none" required />
@@ -60,6 +60,7 @@ export default function Home() {
     );
   }
 
+  // --- LÓGICA DEL DASHBOARD (Cuando ya está logueado) ---
   const resumen = getResumenMes(transacciones, mesSeleccionado);
 
   return (
@@ -88,7 +89,6 @@ export default function Home() {
         <div className="text-center text-gray-400 py-20 animate-pulse">Cargando finanzas...</div>
       ) : (
         <>
-          {/* 3 Tarjetas Principales (Sin Ahorro) con espacio de sobra para los números */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
 
             <div className="bg-gray-800 p-5 rounded-2xl shadow-lg border border-gray-700 flex flex-col justify-between">

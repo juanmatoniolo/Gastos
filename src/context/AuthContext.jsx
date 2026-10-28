@@ -6,8 +6,8 @@ import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signOut,
-    GoogleAuthProvider, // <-- Nuevo
-    signInWithPopup       // <-- Nuevo
+    GoogleAuthProvider,
+    signInWithPopup
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
@@ -31,20 +31,19 @@ export function AuthProvider({ children }) {
     const registro = (email, password) => createUserWithEmailAndPassword(auth, email, password);
     const logout = () => signOut(auth);
 
-    // Nueva función para Google
     const loginConGoogle = async () => {
         const provider = new GoogleAuthProvider();
         try {
             await signInWithPopup(auth, provider);
         } catch (error) {
             console.error("Error al iniciar sesión con Google:", error);
-            alert("No se pudo iniciar sesión con Google. Intenta de nuevo.");
+            alert("No se pudo iniciar sesión con Google.");
         }
     };
 
     return (
         <AuthContext.Provider value={{ user, login, registro, logout, loginConGoogle, loading }}>
-            {!loading && children}
+            {children} {/* <-- Cambiado: Ahora siempre renderiza los hijos */}
         </AuthContext.Provider>
     );
 }
