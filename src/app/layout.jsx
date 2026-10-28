@@ -4,15 +4,14 @@ import AppShell from "@/components/AppShell";
 import "./globals.css";
 
 export const metadata = {
-  // ⚠️ IMPORTANTE: Cambia esto por tu URL real de Vercel para que las redes sociales encuentren las imágenes
-  metadataBase: new URL('https://liberta-de-gastos.vercel.app'),
+  // ⚠️ Asegúrate de que esta sea la URL del proyecto que decidiste conservar
+  metadataBase: new URL('https://liberta-de-gastos-omega.vercel.app'),
   title: {
     default: 'Mis Finanzas | Control de Gastos',
     template: '%s | Mis Finanzas'
   },
   description: 'Lleva el control absoluto de tus ingresos, egresos, ahorros y cuotas de tarjetas de crédito.',
 
-  // Configuración para cuando compartes el link por WhatsApp, Twitter, etc.
   openGraph: {
     type: 'website',
     locale: 'es_AR',
@@ -21,7 +20,7 @@ export const metadata = {
     description: 'Toma el control de tu dinero con estadísticas, control de cuotas y proyecciones.',
     siteName: 'Mis Finanzas',
     images: [{
-      url: '/og-image.png', // ⚠️ Asegúrate de crear esta imagen y ponerla en la carpeta public
+      url: '/og-image.png',
       width: 1200,
       height: 630,
       alt: 'Mis Finanzas - Dashboard',
@@ -34,7 +33,7 @@ export const metadata = {
     images: ['/og-image.png'],
   },
 
-  // Aquí apuntamos a TUS archivos reales
+  // Aquí están tus íconos, perfectamente configurados
   icons: {
     icon: [
       { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
@@ -50,7 +49,6 @@ export const metadata = {
     statusBarStyle: 'black-translucent',
   },
 
-  // Apuntamos a manifest.json, no al webmanifest
   manifest: '/manifest.json',
 };
 
