@@ -1,21 +1,24 @@
 {
-	"name": "Mis Finanzas",
-	"short_name": "Finanzas",
-	"description": "Control de ingresos y egresos personales",
+	"name": "Mis Finanzas - Control de Gastos",
+	"short_name": "Mis Finanzas",
+	"description": "Gestiona tus ingresos, egresos, ahorros y tarjetas de crédito de forma inteligente.",
 	"start_url": "/",
 	"display": "standalone",
 	"background_color": "#111827",
 	"theme_color": "#111827",
+	"orientation": "portrait",
 	"icons": [
 		{
 			"src": "/icon-192x192.png",
 			"sizes": "192x192",
-			"type": "image/png"
+			"type": "image/png",
+			"purpose": "any maskable"
 		},
 		{
 			"src": "/icon-512x512.png",
 			"sizes": "512x512",
-			"type": "image/png"
+			"type": "image/png",
+			"purpose": "any maskable"
 		}
 	]
 }
