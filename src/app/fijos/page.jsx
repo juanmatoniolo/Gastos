@@ -7,6 +7,7 @@ import { formatCurrency } from "@/utils/formatters";
 import { getResumenMes } from "@/utils/proyecciones";
 import { eliminarTransaccion } from "@/services/transaccionesService";
 import FormularioTransaccion from "@/components/FormularioTransaccion";
+import { CATEGORIAS_EGRESOS } from "@/utils/constantes"; // Importamos para buscar el label
 
 export default function GastosFijos() {
     const { user } = useAuth();
@@ -16,8 +17,6 @@ export default function GastosFijos() {
     const [mostrarForm, setMostrarForm] = useState(false);
     const [transaccionAEditar, setTransaccionAEditar] = useState(null);
 
-    // Filtramos las transacciones que son gastos fijos reales
-    // (Servicios fijos o Tarjetas de crédito con más de 1 cuota)
     const gastosFijosBase = transacciones?.filter(t =>
         t.tipo === 'egreso' && (
             t.categoria === 'servicio_fijo' ||
@@ -31,16 +30,13 @@ export default function GastosFijos() {
         const meses = [];
         const hoy = new Date();
 
-        // Generar exactamente 12 meses a partir de este mes
         for (let i = 0; i < 12; i++) {
             const fecha = new Date(hoy.getFullYear(), hoy.getMonth() + i, 1);
-            const mesStr = fecha.toISOString().slice(0, 7); // YYYY-MM
+            const mesStr = fecha.toISOString().slice(0, 7);
             const mesNombre = fecha.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
 
-            // Usamos la función inteligente de proyecciones
             const resumen = getResumenMes(transacciones, mesStr);
 
-            // Separar los gastos para mostrar el detalle
             const servicios = resumen.transacciones.filter(t => t.tipo === "egreso" && t.categoria === "servicio_fijo");
             const cuotas = resumen.transacciones.filter(t => t.tipo === "egreso" && t.metodoPago === "tarjeta_credito" && t.cuotasData?.activa);
 
@@ -84,7 +80,6 @@ export default function GastosFijos() {
                 </button>
             </div>
 
-            {/* SECCIÓN 1: Gestión de Fijos Activos */}
             <section className="mb-10">
                 <h2 className="text-lg font-semibold mb-4 text-white border-b border-gray-700 pb-2">Fijos Activos</h2>
 
@@ -94,50 +89,61 @@ export default function GastosFijos() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {gastosFijosBase.map((t) => (
-                            <div key={t.id} className="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg flex flex-col justify-between">
-                                <div>
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="font-bold text-white text-lg truncate pr-2" title={t.descripcion}>
-                                            {t.descripcion}
-                                        </h3>
-                                        <span className={`text-xs px-2 py-1 rounded-md font-bold shrink-0 ${t.metodoPago === 'tarjeta_credito' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
-                                            {t.metodoPago === 'tarjeta_credito' ? 'Tarjeta' : 'Servicio'}
-                                        </span>
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-100 mb-1">{formatCurrency(t.monto)}</p>
+                        {gastosFijosBase.map((t) => {
+                            // Lógica para mostrar un título claro: Subcategoría > Descripción > Categoría
+                            const titulo = t.subcategoria || t.descripcion;
+                            const labelCategoria = CATEGORIAS_EGRESOS.find(c => c.id === t.categoria)?.label;
 
-                                    {t.metodoPago === 'tarjeta_credito' ? (
-                                        <p className="text-sm text-gray-400">
-                                            {t.cuotasData.cantidad} cuotas de {formatCurrency(t.cuotasData.montoPorCuota)}
+                            return (
+                                <div key={t.id} className="bg-gray-800 p-5 rounded-2xl border border-gray-700 shadow-lg flex flex-col justify-between">
+                                    <div>
+                                        <div className="flex justify-between items-start mb-1">
+                                            <h3 className="font-bold text-white text-lg truncate pr-2 capitalize" title={titulo}>
+                                                {titulo}
+                                            </h3>
+                                            <span className={`text-xs px-2 py-1 rounded-md font-bold shrink-0 ${t.metodoPago === 'tarjeta_credito' ? 'bg-orange-500/20 text-orange-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                                                {t.metodoPago === 'tarjeta_credito' ? 'Tarjeta' : 'Servicio'}
+                                            </span>
+                                        </div>
+
+                                        {/* Mostramos la categoría en chiquito para saber qué es */}
+                                        <p className="text-xs text-gray-400 mb-3 truncate capitalize">
+                                            {labelCategoria}
                                         </p>
-                                    ) : (
-                                        <p className="text-sm text-gray-400">Mensual</p>
-                                    )}
-                                </div>
 
-                                <div className="flex gap-2 mt-4 pt-4 border-t border-gray-700/50">
-                                    <button onClick={() => abrirEditar(t)} className="flex-1 text-xs bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition font-medium">
-                                        Editar
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            if (window.confirm("¿Seguro que quieres eliminar este gasto fijo? Se borrarán también sus proyecciones futuras.")) {
-                                                eliminarTransaccion(user.uid, t.id);
-                                            }
-                                        }}
-                                        className="flex-1 text-xs bg-red-900/30 hover:bg-red-900/60 text-red-400 py-2 rounded-lg transition font-medium"
-                                    >
-                                        Borrar
-                                    </button>
+                                        <p className="text-2xl font-bold text-gray-100 mb-1">{formatCurrency(t.monto)}</p>
+
+                                        {t.metodoPago === 'tarjeta_credito' ? (
+                                            <p className="text-sm text-gray-400">
+                                                {t.cuotasData.cantidad} cuotas de {formatCurrency(t.cuotasData.montoPorCuota)}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-gray-400">Mensual</p>
+                                        )}
+                                    </div>
+
+                                    <div className="flex gap-2 mt-4 pt-4 border-t border-gray-700/50">
+                                        <button onClick={() => abrirEditar(t)} className="flex-1 text-xs bg-gray-700 hover:bg-gray-600 text-white py-2 rounded-lg transition font-medium">
+                                            Editar
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (window.confirm("¿Seguro que quieres eliminar este gasto fijo? Se borrarán también sus proyecciones futuras.")) {
+                                                    eliminarTransaccion(user.uid, t.id);
+                                                }
+                                            }}
+                                            className="flex-1 text-xs bg-red-900/30 hover:bg-red-900/60 text-red-400 py-2 rounded-lg transition font-medium"
+                                        >
+                                            Borrar
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
             </section>
 
-            {/* SECCIÓN 2: Proyección */}
             <section>
                 <h2 className="text-lg font-semibold mb-4 text-white border-b border-gray-700 pb-2">Proyección a 12 Meses</h2>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -164,17 +170,16 @@ export default function GastosFijos() {
                                 </div>
                             </div>
 
-                            {/* Detalles */}
                             <div className="flex flex-col gap-2">
                                 {mes.servicios.map((s, i) => (
                                     <div key={`serv-${i}`} className="flex justify-between text-xs text-gray-300">
-                                        <span className="flex items-center gap-1.5 truncate pr-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0"></span> {s.descripcion}</span>
+                                        <span className="flex items-center gap-1.5 truncate pr-2"><span className="w-1.5 h-1.5 bg-blue-500 rounded-full shrink-0"></span> {s.subcategoria || s.descripcion}</span>
                                         <span className="text-gray-400 shrink-0">{formatCurrency(s.monto)}</span>
                                     </div>
                                 ))}
                                 {mes.cuotas.map((c, i) => (
                                     <div key={`cuota-${i}`} className="flex justify-between text-xs text-gray-300">
-                                        <span className="flex items-center gap-1.5 truncate pr-2"><span className="w-1.5 h-1.5 bg-orange-500 rounded-full shrink-0"></span> {c.descripcion}</span>
+                                        <span className="flex items-center gap-1.5 truncate pr-2"><span className="w-1.5 h-1.5 bg-orange-500 rounded-full shrink-0"></span> {c.subcategoria || c.descripcion}</span>
                                         <span className="text-gray-400 shrink-0">{formatCurrency(c.cuotasData.montoPorCuota)}</span>
                                     </div>
                                 ))}
@@ -187,7 +192,6 @@ export default function GastosFijos() {
                 </div>
             </section>
 
-            {/* Modal del Formulario */}
             {mostrarForm && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex justify-center items-start md:items-center p-4 overflow-y-auto" onClick={() => setMostrarForm(false)}>
                     <div className="w-full max-w-md md:max-w-xl my-auto py-8" onClick={(e) => e.stopPropagation()}>

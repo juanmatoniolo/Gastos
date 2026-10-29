@@ -4,14 +4,12 @@ import AppShell from "@/components/AppShell";
 import "./globals.css";
 
 export const metadata = {
-  // ⚠️ Asegúrate de que esta sea la URL del proyecto que decidiste conservar
   metadataBase: new URL('https://liberta-de-gastos-omega.vercel.app'),
   title: {
     default: 'Mis Finanzas | Control de Gastos',
     template: '%s | Mis Finanzas'
   },
   description: 'Lleva el control absoluto de tus ingresos, egresos, ahorros y cuotas de tarjetas de crédito.',
-
   openGraph: {
     type: 'website',
     locale: 'es_AR',
@@ -32,8 +30,6 @@ export const metadata = {
     description: 'Toma el control de tu dinero con estadísticas y proyecciones.',
     images: ['/og-image.png'],
   },
-
-  // Aquí están tus íconos, perfectamente configurados
   icons: {
     icon: [
       { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' },
@@ -43,12 +39,10 @@ export const metadata = {
     shortcut: '/favicon.ico',
     apple: '/apple-touch-icon.png',
   },
-
   appleWebApp: {
     title: 'Mis Finanzas',
     statusBarStyle: 'black-translucent',
   },
-
   manifest: '/manifest.json',
 };
 

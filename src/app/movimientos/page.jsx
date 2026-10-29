@@ -6,6 +6,7 @@ import { useTransacciones } from "@/hooks/useTransacciones";
 import { eliminarTransaccion } from "@/services/transaccionesService";
 import FormularioTransaccion from "@/components/FormularioTransaccion";
 import { formatCurrency } from "@/utils/formatters";
+import { CATEGORIAS_EGRESOS } from "@/utils/constantes";
 
 export default function Movimientos() {
     const { user } = useAuth();
@@ -16,7 +17,6 @@ export default function Movimientos() {
 
     if (loading) return <div className="p-10 text-center animate-pulse text-gray-400">Cargando...</div>;
 
-    // Filtramos solo los reales (ignoramos proyecciones y cuotas virtuales para editar)
     const movimientosReales = transacciones.filter(t => !t.id.includes('rec') && !t.id.includes('cuota'));
     const movimientosFiltrados = movimientosReales.filter(t => t.fecha.startsWith(filtroMes));
 
@@ -49,36 +49,37 @@ export default function Movimientos() {
                 {movimientosFiltrados.length === 0 ? (
                     <div className="text-center py-10 text-gray-500">No hay movimientos registrados este mes.</div>
                 ) : (
-                    movimientosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).map((t) => (
-                        <li key={t.id} className="bg-gray-800 p-4 rounded-xl flex flex-col md:flex-row md:justify-between items-start md:items-center border border-gray-700 gap-3">
+                    movimientosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).map((t) => {
+                        const titulo = t.subcategoria || t.descripcion;
+                        const labelCategoria = CATEGORIAS_EGRESOS.find(c => c.id === t.categoria)?.label || t.categoria.replace(/_/g, ' ');
 
-                            {/* Info de la transacción */}
-                            <div className="flex items-center gap-3 min-w-0 pr-2">
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 ${t.tipo === 'ingreso' ? 'bg-green-900/50 text-green-400' : t.categoria === 'ahorro' ? 'bg-teal-900/50 text-teal-400' : 'bg-red-900/50 text-red-400'}`}>
-                                    {t.tipo === 'ingreso' ? "↓" : t.categoria === 'ahorro' ? "💰" : "↑"}
+                        return (
+                            <li key={t.id} className="bg-gray-800 p-4 rounded-xl flex flex-col md:flex-row md:justify-between items-start md:items-center border border-gray-700 gap-3">
+
+                                <div className="flex items-center gap-3 min-w-0 pr-2">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg shrink-0 ${t.tipo === 'ingreso' ? 'bg-green-900/50 text-green-400' : t.categoria === 'ahorro' ? 'bg-teal-900/50 text-teal-400' : 'bg-red-900/50 text-red-400'}`}>
+                                        {t.tipo === 'ingreso' ? "↓" : t.categoria === 'ahorro' ? "💰" : "↑"}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-white truncate text-base capitalize">{titulo}</p>
+                                        <p className="text-xs text-gray-400 truncate capitalize">
+                                            {labelCategoria} • {t.fecha}
+                                        </p>
+                                    </div>
                                 </div>
-                                <div className="min-w-0">
-                                    <p className="font-semibold text-white truncate text-base">{t.descripcion}</p>
-                                    <p className="text-xs text-gray-400 truncate capitalize">
-                                        {t.categoria.replace(/_/g, ' ')}
-                                        {t.subcategoria && ` • ${t.subcategoria}`}
-                                        {` • ${t.fecha}`}
+
+                                <div className="flex w-full md:w-auto justify-between md:justify-end items-center gap-4 shrink-0">
+                                    <p className={`font-bold text-lg ${t.tipo === 'ingreso' ? 'text-green-400' : t.categoria === 'ahorro' ? 'text-teal-400' : 'text-red-400'}`}>
+                                        {t.tipo === 'ingreso' ? '+' : '-'}{formatCurrency(t.monto)}
                                     </p>
+                                    <div className="flex gap-2">
+                                        <button onClick={() => abrirEditar(t)} className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg transition">Editar</button>
+                                        <button onClick={() => { if (window.confirm("¿Seguro?")) eliminarTransaccion(user.uid, t.id) }} className="text-xs bg-red-900/30 hover:bg-red-900/60 text-red-400 px-3 py-1.5 rounded-lg transition">Borrar</button>
+                                    </div>
                                 </div>
-                            </div>
-
-                            {/* Monto y Botones */}
-                            <div className="flex w-full md:w-auto justify-between md:justify-end items-center gap-4 shrink-0">
-                                <p className={`font-bold text-lg ${t.tipo === 'ingreso' ? 'text-green-400' : t.categoria === 'ahorro' ? 'text-teal-400' : 'text-red-400'}`}>
-                                    {t.tipo === 'ingreso' ? '+' : '-'}{formatCurrency(t.monto)}
-                                </p>
-                                <div className="flex gap-2">
-                                    <button onClick={() => abrirEditar(t)} className="text-xs bg-gray-700 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg transition">Editar</button>
-                                    <button onClick={() => { if (window.confirm("¿Seguro?")) eliminarTransaccion(user.uid, t.id) }} className="text-xs bg-red-900/30 hover:bg-red-900/60 text-red-400 px-3 py-1.5 rounded-lg transition">Borrar</button>
-                                </div>
-                            </div>
-                        </li>
-                    ))
+                            </li>
+                        );
+                    })
                 )}
             </ul>
 

@@ -3,41 +3,34 @@
 import { useAuth } from "@/context/AuthContext";
 import Sidebar from "./Sidebar";
 import BottomNav from "./BottomNav";
+import LoginView from "./LoginView";
 
 export default function AppShell({ children }) {
     const { user, loading } = useAuth();
 
-    // 1. Mientras carga, mostramos un spinner
-    if (loading) {
-        return (
-            <div className="flex h-screen items-center justify-center bg-gray-900">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-        );
-    }
+    if (loading) return <div className="flex h-screen items-center justify-center bg-gray-900"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>;
 
-    // 2. Si no hay usuario, mostramos SOLO el login (sin menús)
     if (!user) {
         return (
             <main className="min-h-screen bg-gray-900 flex flex-col justify-center">
-                <div className="w-full max-w-md mx-auto p-6 pb-safe">
-                    {children}
-                </div>
+                <LoginView />
             </main>
         );
     }
 
-    // 3. Si hay usuario, mostramos la app completa con menús
     return (
-        <div className="flex h-screen overflow-hidden bg-gray-900">
+        // h-[100dvh] soluciona el problema de la barra de direcciones en iOS/Android
+        <div className="flex h-[100dvh] overflow-hidden bg-gray-900">
             <Sidebar />
 
-            <main className="flex-1 overflow-y-auto pb-24 md:pb-0 relative no-scrollbar">
+            {/* pb-[80px] para dejar espacio al navbar abajo */}
+            <main className="flex-1 overflow-y-auto pb-[80px] md:pb-0 relative no-scrollbar">
                 <div className="max-w-md mx-auto md:max-w-5xl md:mx-auto md:p-8">
                     {children}
                 </div>
             </main>
 
+            {/* Contenedor fixed del navbar para celular */}
             <div className="md:hidden fixed bottom-0 w-full z-50">
                 <BottomNav />
             </div>

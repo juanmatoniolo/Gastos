@@ -4,52 +4,76 @@ export function getTransaccionesDelMes(transacciones, mesStr) {
 	const resultado = [];
 	const [anioStr, mesStrNum] = mesStr.split("-");
 	const anio = parseInt(anioStr);
-	const mes = parseInt(mesStrNum); // 1-12
+	const mes = parseInt(mesStrNum);
 
-	transacciones.forEach((t) => {
-		const [anioCompra, mesCompra] = t.fecha.split("-").map(Number);
+	// 1. Transacciones exactas de este mes (excluyendo virtuales y cuotas)
+	const exactas = transacciones.filter((t) => {
+		if (!t.fecha.startsWith(mesStr)) return false;
+		if (t.metodoPago === "tarjeta_credito" && t.cuotasData?.cantidad > 1)
+			return false;
+		return !t.id.includes("cuota") && !t.id.includes("rec");
+	});
+	resultado.push(...exactas);
 
-		// Diferencia de meses entre la compra y el mes que estamos viendo
-		const diffMeses = (anio - anioCompra) * 12 + (mes - mesCompra);
+	// 2. Agrupar transacciones recurrentes (Ingresos Fijos y Gastos Fijos)
+	const recurrentes = transacciones.filter((t) => t.esRecurrente);
+	const grupos = {};
 
-		// 1. TARJETA DE CRÉDITO EN CUOTAS
-		if (t.metodoPago === "tarjeta_credito" && t.cuotasData?.cantidad > 1) {
-			// Impacta desde el mes siguiente a la compra (diffMeses > 0) hasta terminar las cuotas
-			if (diffMeses > 0 && diffMeses <= t.cuotasData.cantidad) {
+	recurrentes.forEach((t) => {
+		const baseId = t.originalId || t.id;
+		if (!grupos[baseId]) grupos[baseId] = [];
+		grupos[baseId].push(t);
+	});
+
+	// 3. Proyectar la versión correcta para este mes
+	Object.keys(grupos).forEach((baseId) => {
+		const versiones = grupos[baseId];
+		versiones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+		// Buscamos la versión más reciente que sea menor o igual a este mes
+		const versionAplicable = versiones.find(
+			(v) => v.fecha.slice(0, 7) <= mesStr,
+		);
+
+		if (versionAplicable) {
+			const esExacta = versionAplicable.fecha.startsWith(mesStr);
+			// Si no es exacta (no fue creada/editada este mes), la proyectamos como virtual
+			if (!esExacta) {
 				resultado.push({
-					...t,
-					id: `cuota-${t.id}-${mesStr}`, // ID único virtual
-					monto: t.cuotasData.montoPorCuota, // Solo impacta el monto de 1 cuota
-					fecha: `${mesStr}-01`, // Fecha ficticia para ubicarlo en el mes
-					descripcion: `${t.descripcion} (Cuota ${diffMeses}/${t.cuotasData.cantidad})`,
-					esCuotaVirtual: true, // Bandera para la UI
+					...versionAplicable,
+					id: `rec-${versionAplicable.id}-${mesStr}`,
+					fecha: `${mesStr}-01`,
+					esRecurrenteVirtual: true,
 				});
 			}
-			// NOTA: En el mes de la compra (diffMeses === 0) NO lo sumamos a los egresos,
-			// porque con tarjeta de crédito se empieza a pagar al mes siguiente.
 		}
+	});
 
-		// 2. TRANSACCIÓN NORMAL (Efectivo, Débito, o Tarjeta en 1 pago)
-		else if (t.fecha.startsWith(mesStr)) {
-			resultado.push(t);
-		}
+	// 4. Cuotas de Tarjeta de Crédito
+	transacciones.forEach((t) => {
+		const [anioCompra, mesCompra] = t.fecha.split("-").map(Number);
+		const diffMeses = (anio - anioCompra) * 12 + (mes - mesCompra);
 
-		// 3. INGRESOS RECURRENTES (Sueldo)
-		else if (t.esRecurrente && t.fecha.slice(0, 7) < mesStr) {
-			// Evitar duplicados si el usuario ya cargó un sueldo nuevo este mes
-			const tieneOverride = transacciones.some(
-				(ex) =>
-					ex.descripcion === t.descripcion &&
-					ex.tipo === t.tipo &&
-					ex.fecha.startsWith(mesStr) &&
-					ex.esRecurrente,
-			);
-			if (!tieneOverride) {
-				resultado.push({
-					...t,
-					id: `rec-${t.id}`,
-					fecha: `${mesStr}-01`,
-				});
+		if (t.metodoPago === "tarjeta_credito" && t.cuotasData?.cantidad > 1) {
+			if (diffMeses > 0 && diffMeses <= t.cuotasData.cantidad) {
+				const hasOverride = transacciones.some(
+					(ex) =>
+						ex.originalId === t.id && ex.fecha.startsWith(mesStr),
+				);
+
+				if (!hasOverride) {
+					const cleanDesc = (t.descripcion || "")
+						.replace(/\s*\(Cuota \d+\/\d+\)/g, "")
+						.trim();
+					resultado.push({
+						...t,
+						id: `cuota-${t.id}-${mesStr}`,
+						monto: t.cuotasData.montoPorCuota,
+						fecha: `${mesStr}-01`,
+						descripcion: `${cleanDesc} (Cuota ${diffMeses}/${t.cuotasData.cantidad})`,
+						esCuotaVirtual: true,
+					});
+				}
 			}
 		}
 	});
@@ -71,7 +95,7 @@ export function getResumenMes(transacciones, mesStr) {
 			if (t.categoria === "ahorro") {
 				ahorrosMes += t.monto;
 			} else {
-				egresos += t.monto; // Aquí se suman las cuotas virtuales de las tarjetas
+				egresos += t.monto;
 				if (
 					t.metodoPago === "tarjeta_credito" &&
 					t.cuotasData?.activa
