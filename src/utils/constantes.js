@@ -8,10 +8,12 @@ export const CATEGORIAS_EGRESOS = [
 	{ id: "vestimenta", label: "Vestimenta" },
 	{ id: "salud", label: "Salud (Médico, Farmacia)" },
 	{ id: "recreacion", label: "Recreación (Salidas, Asados)" },
-	{ id: "ahorro", label: "Ahorro / Inversión (Dólares, Plazo Fijo, etc.)" }, // <-- NUEVA
+	{ id: "ahorro", label: "Ahorro / Inversión (Dólares, Plazo Fijo, etc.)" },
+	{ id: "otro", label: "Otro Gasto" }, // <-- NUEVO
 ];
 
 export const CATEGORIAS_INGRESOS = [
 	{ id: "ingreso_fijo", label: "Ingreso Fijo (Sueldo)" },
 	{ id: "ingreso_variable", label: "Ingreso Variable (Extras)" },
+	{ id: "otro_ingreso", label: "Otro Ingreso" }, // <-- NUEVO
 ];

@@ -11,18 +11,14 @@ export default function PaginaAhorros() {
 
     if (loading) return <div className="p-10 text-center text-gray-400">Cargando...</div>;
 
-    // Filtramos solo los ahorros reales (ignorando las proyecciones)
     const ahorros = transacciones.filter(t => t.categoria === "ahorro" && !t.id.includes('rec'));
-
-    // Sumamos el total ahorrado
     const totalAhorrado = ahorros.reduce((acc, curr) => acc + curr.monto, 0);
 
     return (
-        <div className="p-4 md:p-8">
+        <div className="p-4 md:p-8 pb-24 md:pb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-white mb-2 pt-4">Mi Ahorro</h1>
             <p className="text-gray-400 text-sm mb-6">Fondos apartados que estás construyendo.</p>
 
-            {/* Tarjeta de Total */}
             <div className="bg-gradient-to-br from-teal-600 to-emerald-800 p-6 rounded-2xl shadow-xl mb-8 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10"></div>
                 <p className="text-teal-100 text-sm font-medium mb-1 relative z-10">Total Ahorrado</p>
@@ -46,7 +42,7 @@ export default function PaginaAhorros() {
                                     💰
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <p className="font-semibold text-white capitalize truncate">{t.subcategoria || t.descripcion}</p>
+                                    <p className="font-semibold text-white capitalize truncate">{t.descripcion || t.subcategoria || "Ahorro"}</p>
                                     <p className="text-xs text-gray-400 truncate">{t.fecha.split('T')[0]}</p>
                                 </div>
                             </div>

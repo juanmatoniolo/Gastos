@@ -5,8 +5,10 @@ import { useAuth } from "@/context/AuthContext";
 import { useTransacciones } from "@/hooks/useTransacciones";
 import { eliminarTransaccion } from "@/services/transaccionesService";
 import FormularioTransaccion from "@/components/FormularioTransaccion";
+import MonthPicker from "@/components/MonthPicker";
 import { formatCurrency } from "@/utils/formatters";
-import { CATEGORIAS_EGRESOS } from "@/utils/constantes";
+import { CATEGORIAS_EGRESOS, CATEGORIAS_INGRESOS } from "@/utils/constantes";
+import * as XLSX from 'xlsx';
 
 export default function Movimientos() {
     const { user } = useAuth();
@@ -19,6 +21,7 @@ export default function Movimientos() {
 
     const movimientosReales = transacciones.filter(t => !t.id.includes('rec') && !t.id.includes('cuota'));
     const movimientosFiltrados = movimientosReales.filter(t => t.fecha.startsWith(filtroMes));
+    const movimientosOrdenados = movimientosFiltrados.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
 
     const abrirEditar = (t) => {
         setTransaccionAEditar(t);
@@ -30,17 +33,84 @@ export default function Movimientos() {
         setMostrarForm(true);
     };
 
+    // --- LÓGICA PARA EXPORTAR LIBRO CONTABLE A EXCEL ---
+    const exportarLibroContable = () => {
+        if (movimientosOrdenados.length === 0) {
+            alert("No hay movimientos para exportar en este mes.");
+            return;
+        }
+
+        const rows = [
+            ["Fecha", "Descripción", "Categoría", "Subcategoría", "Ingreso", "Egreso"]
+        ];
+
+        let totalIngresos = 0;
+        let totalEgresos = 0;
+
+        movimientosOrdenados.forEach(t => {
+            const catLabel = CATEGORIAS_EGRESOS.find(c => c.id === t.categoria)?.label
+                || CATEGORIAS_INGRESOS.find(c => c.id === t.categoria)?.label
+                || t.categoria;
+
+            const monto = Number(t.monto) || 0;
+            const esIngreso = t.tipo === "ingreso";
+
+            if (esIngreso) totalIngresos += monto;
+            else totalEgresos += monto;
+
+            rows.push([
+                t.fecha,
+                t.descripcion || t.subcategoria || "-",
+                catLabel,
+                t.subcategoria || "-",
+                esIngreso ? monto : "",  // Si es ingreso, lo ponemos en la columna Ingreso
+                !esIngreso ? monto : ""  // Si es egreso, lo ponemos en la columna Egreso
+            ]);
+        });
+
+        // Fila vacía para separar
+        rows.push(["", "", "", "", "", ""]);
+
+        // FILA DE SUBTOTALES
+        rows.push(["", "", "", "SUBTOTALES", totalIngresos, totalEgresos]);
+
+        // FILA DE BALANCE FINAL (Ingresos - Egresos)
+        const balance = totalIngresos - totalEgresos;
+        rows.push(["", "", "", "BALANCE FINAL", balance > 0 ? balance : "", balance < 0 ? Math.abs(balance) : ""]);
+
+        // Creamos la hoja de Excel
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+
+        // Le damos formato a las columnas (ancho)
+        ws['!cols'] = [
+            { wch: 12 }, // Fecha
+            { wch: 30 }, // Descripción
+            { wch: 30 }, // Categoría
+            { wch: 20 }, // Subcategoría
+            { wch: 15 }, // Ingreso
+            { wch: 15 }  // Egreso
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Libro Contable");
+        XLSX.writeFile(wb, `Libro_Contable_${filtroMes}.xlsx`);
+    };
+
     return (
         <div className="p-4 md:p-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 pt-4 gap-4">
-                <h1 className="text-2xl font-bold text-white">Historial Real</h1>
-                <div className="flex w-full md:w-auto items-center gap-3">
-                    <input
-                        type="month"
-                        value={filtroMes}
-                        onChange={(e) => setFiltroMes(e.target.value)}
-                        className="bg-gray-800 text-white p-2.5 rounded-xl border border-gray-700 text-sm font-medium focus:border-blue-500 outline-none w-full md:w-auto"
-                    />
+                <h1 className="text-2xl font-bold text-white">Historial y Libro Contable</h1>
+                <div className="flex flex-wrap w-full md:w-auto items-center gap-2 md:gap-3">
+                    <MonthPicker value={filtroMes} onChange={setFiltroMes} className="w-full sm:w-40" />
+
+                    <button
+                        onClick={exportarLibroContable}
+                        className="bg-green-600 hover:bg-green-500 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-md transition-colors flex items-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Excel Contable
+                    </button>
+
                     <button onClick={abrirNuevo} className="md:hidden bg-blue-600 px-4 py-2.5 rounded-xl text-white font-bold whitespace-nowrap">+ Nuevo</button>
                 </div>
             </div>
@@ -49,9 +119,9 @@ export default function Movimientos() {
                 {movimientosFiltrados.length === 0 ? (
                     <div className="text-center py-10 text-gray-500">No hay movimientos registrados este mes.</div>
                 ) : (
-                    movimientosFiltrados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).map((t) => {
-                        const titulo = t.subcategoria || t.descripcion;
-                        const labelCategoria = CATEGORIAS_EGRESOS.find(c => c.id === t.categoria)?.label || t.categoria.replace(/_/g, ' ');
+                    movimientosOrdenados.reverse().map((t) => {
+                        const titulo = t.descripcion || t.subcategoria || "Sin descripción";
+                        const labelCategoria = CATEGORIAS_EGRESOS.find(c => c.id === t.categoria)?.label || CATEGORIAS_INGRESOS.find(c => c.id === t.categoria)?.label || t.categoria.replace(/_/g, ' ');
 
                         return (
                             <li key={t.id} className="bg-gray-800 p-4 rounded-xl flex flex-col md:flex-row md:justify-between items-start md:items-center border border-gray-700 gap-3">
@@ -63,7 +133,7 @@ export default function Movimientos() {
                                     <div className="min-w-0">
                                         <p className="font-semibold text-white truncate text-base capitalize">{titulo}</p>
                                         <p className="text-xs text-gray-400 truncate capitalize">
-                                            {labelCategoria} • {t.fecha}
+                                            {labelCategoria} {t.subcategoria && t.subcategoria !== titulo && `• ${t.subcategoria}`} • {t.fecha}
                                         </p>
                                     </div>
                                 </div>
@@ -90,6 +160,8 @@ export default function Movimientos() {
                             userId={user.uid}
                             onClose={() => setMostrarForm(false)}
                             transaccionAEditar={transaccionAEditar}
+                            transacciones={transacciones}
+                            mesSeleccionado={filtroMes}
                         />
                     </div>
                 </div>

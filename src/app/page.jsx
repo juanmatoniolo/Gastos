@@ -5,10 +5,11 @@ import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useTransacciones } from "@/hooks/useTransacciones";
 import FormularioTransaccion from "@/components/FormularioTransaccion";
+import MonthPicker from "@/components/MonthPicker";
 import { eliminarTransaccion } from "@/services/transaccionesService";
 import { formatCurrency } from "@/utils/formatters";
 import { getResumenMes } from "@/utils/proyecciones";
-import { CATEGORIAS_EGRESOS } from "@/utils/constantes";
+import { CATEGORIAS_EGRESOS, CATEGORIAS_INGRESOS } from "@/utils/constantes";
 
 export default function Home() {
   const { user, logout } = useAuth();
@@ -41,12 +42,12 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-          <input
-            type="month"
+          <MonthPicker
             value={mesSeleccionado}
-            onChange={(e) => setMesSeleccionado(e.target.value)}
-            className="bg-gray-800 text-white p-2.5 rounded-xl border border-gray-700 font-medium focus:outline-none focus:border-blue-500 shadow-sm"
+            onChange={setMesSeleccionado}
+            className="w-40"
           />
+
           <div className="hidden md:flex gap-3">
             <button onClick={abrirNuevo} className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg flex items-center gap-2 transition-colors"><span className="text-xl">+</span> Nuevo</button>
             <button onClick={logout} className="text-sm bg-gray-800 px-4 py-2.5 rounded-xl text-red-400 hover:bg-gray-700 border border-gray-700 transition-colors">Salir</button>
@@ -91,8 +92,9 @@ export default function Home() {
             ) : (
               <ul className="flex flex-col gap-3">
                 {resumen.transacciones.map((t) => {
-                  const titulo = t.subcategoria || t.descripcion;
-                  const labelCategoria = CATEGORIAS_EGRESOS.find(c => c.id === t.categoria)?.label || t.categoria.replace(/_/g, ' ');
+                  const titulo = t.descripcion || t.subcategoria || "Sin descripción";
+                  const labelCategoria = CATEGORIAS_EGRESOS.find(c => c.id === t.categoria)?.label || CATEGORIAS_INGRESOS.find(c => c.id === t.categoria)?.label || t.categoria.replace(/_/g, ' ');
+                  const subtitulo = t.subcategoria && t.subcategoria !== titulo ? t.subcategoria : labelCategoria;
 
                   return (
                     <li key={t.id} className="bg-gray-800 p-4 rounded-xl flex justify-between items-center border border-gray-700/50">
@@ -103,7 +105,7 @@ export default function Home() {
                         <div className="flex flex-col min-w-0">
                           <p className="font-semibold text-sm text-gray-100 capitalize truncate">{titulo}</p>
                           <p className="text-xs text-gray-400 capitalize truncate">
-                            {labelCategoria} {t.id.includes('rec') && <span className="text-blue-400 font-bold ml-1">(Fijo)</span>}
+                            {subtitulo} {t.id.includes('rec') && <span className="text-blue-400 font-bold ml-1">(Fijo)</span>}
                             {t.esCuotaVirtual && <span className="text-orange-400 font-bold ml-1">(Tarjeta)</span>}
                           </p>
                         </div>
@@ -140,7 +142,7 @@ export default function Home() {
         </>
       )}
 
-      <button onClick={abrirNuevo} className="md:hidden fixed bottom-24 right-6 w-16 h-16 bg-blue-600 rounded-full shadow-2xl flex items-center justify-center text-white text-3xl z-40 border-4 border-gray-900"><span>+</span></button>
+      <button onClick={abrirNuevo} className="md:hidden fixed bottom-28 right-6 w-16 h-16 bg-blue-600 rounded-full shadow-2xl flex items-center justify-center text-white text-3xl z-40 border-4 border-gray-900"><span>+</span></button>
 
       {mostrarForm && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex justify-center items-start md:items-center p-4 overflow-y-auto" onClick={() => setMostrarForm(false)}>
@@ -149,6 +151,8 @@ export default function Home() {
               userId={user.uid}
               onClose={() => setMostrarForm(false)}
               transaccionAEditar={transaccionAEditar}
+              transacciones={transacciones}
+              mesSeleccionado={mesSeleccionado}
             />
           </div>
         </div>

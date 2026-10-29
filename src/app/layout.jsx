@@ -52,6 +52,7 @@ export const viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
+  viewportFit: "cover", // <--- ESTO ES LO QUE ARREGLA EL IPHONE
 };
 
 export default function RootLayout({ children }) {
@@ -59,9 +60,7 @@ export default function RootLayout({ children }) {
     <html lang="es" className="h-full antialiased">
       <body className="bg-gray-900 text-gray-100 min-h-screen" suppressHydrationWarning={true}>
         <AuthProvider>
-          <AppShell>
-            {children}
-          </AppShell>
+          <AppShell>{children}</AppShell>
         </AuthProvider>
       </body>
     </html>
