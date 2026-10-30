@@ -2,7 +2,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link"; // <-- Importamos Link
+import Link from "next/link";
+import { useRouter } from "next/navigation"; // <-- Importamos router
 import { useAuth } from "@/context/AuthContext";
 import { useTransacciones } from "@/hooks/useTransacciones";
 import { useToast } from "@/components/Toast";
@@ -21,6 +22,7 @@ export default function Home() {
   const { user, logout } = useAuth();
   const { transacciones, loading: dataLoading } = useTransacciones(user?.uid);
   const toast = useToast();
+  const router = useRouter();
 
   const [mostrarForm, setMostrarForm] = useState(false);
   const [transaccionAEditar, setTransaccionAEditar] = useState(null);
@@ -31,6 +33,9 @@ export default function Home() {
 
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transfiriendo, setTransfiriendo] = useState(false);
+
+  // NUEVO ESTADO PARA EL MENÚ MÓVIL
+  const [showMenu, setShowMenu] = useState(false);
 
   const resumen = useMemo(
     () => getResumenMes(transacciones || [], mesSeleccionado),
@@ -97,6 +102,18 @@ export default function Home() {
 
         <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
           <MonthPicker value={mesSeleccionado} onChange={setMesSeleccionado} className="w-40" />
+
+          {/* BOTÓN DE MENÚ PARA CELULAR */}
+          <button
+            onClick={() => setShowMenu(true)}
+            className="md:hidden bg-gray-800 border border-gray-700 text-gray-300 p-2.5 rounded-xl active:scale-95 transition-transform min-h-11 min-w-11 flex items-center justify-center"
+            aria-label="Abrir menú"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+
           <div className="hidden md:flex gap-3">
             <button
               onClick={abrirNuevo}
@@ -173,7 +190,6 @@ export default function Home() {
               </div>
             ) : (
               <ul className="flex flex-col gap-3">
-                {/* Mostramos solo los primeros 5 para no llenar el inicio */}
                 {resumen.transacciones.slice(0, 5).map((t) => {
                   const titulo = t.descripcion || t.subcategoria || "Sin descripción";
                   const labelCategoria =
@@ -305,6 +321,36 @@ export default function Home() {
             label: "Cancelar",
             variant: "ghost",
             onClick: () => setShowTransferModal(false),
+          },
+        ]}
+      />
+
+      {/* NUEVO MODAL DE MENÚ PARA CELULAR */}
+      <ConfirmSheet
+        open={showMenu}
+        title="Menú de Usuario"
+        description="Accedé a las opciones que no están en la barra inferior."
+        actions={[
+          {
+            label: "📝 Ir a Bóveda (Notas)",
+            variant: "primary",
+            onClick: () => {
+              setShowMenu(false);
+              router.push("/notas");
+            },
+          },
+          {
+            label: "🚪 Cerrar Sesión",
+            variant: "danger",
+            onClick: () => {
+              setShowMenu(false);
+              logout();
+            },
+          },
+          {
+            label: "Cancelar",
+            variant: "ghost",
+            onClick: () => setShowMenu(false),
           },
         ]}
       />
