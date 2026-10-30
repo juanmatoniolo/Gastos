@@ -5,7 +5,8 @@
     background-color: rgba(0, 0, 0, 0.75);
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
-    z-index: 50;
+    z-index: 9999;
+    /* AUMENTADO: Para que quede por encima del BottomNav (que tiene z-50) */
     display: flex;
     justify-content: center;
     align-items: flex-end;
@@ -29,7 +30,8 @@
     border: 1px solid #374151;
     width: 100%;
     max-width: 32rem;
-    max-height: 90dvh;
+    max-height: 92dvh;
+    /* Un poquito más alto */
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -40,6 +42,7 @@
     .modalContainer {
         border-radius: 1rem;
         max-width: 36rem;
+        max-height: 85dvh;
     }
 }
 
@@ -105,11 +108,14 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    /* ESPACIO EXTRA PARA SCROLLEAR CUANDO EL TECLADO ESTÁ ABIERTO */
+    padding-bottom: max(6rem, calc(env(safe-area-inset-bottom) + 4rem));
 }
 
 @media (min-width: 768px) {
     .body {
         padding: 2rem;
+        padding-bottom: 2rem;
     }
 }
 
