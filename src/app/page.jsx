@@ -2,6 +2,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link"; // <-- Importamos Link
 import { useAuth } from "@/context/AuthContext";
 import { useTransacciones } from "@/hooks/useTransacciones";
 import { useToast } from "@/components/Toast";
@@ -31,7 +32,6 @@ export default function Home() {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transfiriendo, setTransfiriendo] = useState(false);
 
-  // Resumen calculado con getResumenMes
   const resumen = useMemo(
     () => getResumenMes(transacciones || [], mesSeleccionado),
     [transacciones, mesSeleccionado]
@@ -51,7 +51,8 @@ export default function Home() {
   const confirmarBorrado = async () => {
     if (!transaccionAEliminar) return;
     try {
-      await eliminarTransaccion(user.uid, transaccionAEliminar.id);
+      const idReal = transaccionAEliminar.originalId || transaccionAEliminar.id;
+      await eliminarTransaccion(user.uid, idReal);
       toast.success("Movimiento eliminado");
     } catch {
       toast.error("No se pudo eliminar");
@@ -151,9 +152,15 @@ export default function Home() {
           </div>
 
           <section className="mt-4">
-            <h2 className="text-lg md:text-xl font-semibold mb-4 text-white">
-              Movimientos de este Mes
-            </h2>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg md:text-xl font-semibold text-white">
+                Movimientos de este Mes
+              </h2>
+              <Link href="/actividad" className="text-sm text-blue-400 font-bold hover:text-blue-300 transition-colors">
+                Ver todo
+              </Link>
+            </div>
+
             {resumen.transacciones.length === 0 ? (
               <div className="text-center py-10 bg-gray-800/50 rounded-2xl border border-gray-700/50 border-dashed">
                 <p className="text-gray-400">No hay movimientos registrados en este mes.</p>
@@ -166,7 +173,8 @@ export default function Home() {
               </div>
             ) : (
               <ul className="flex flex-col gap-3">
-                {resumen.transacciones.map((t) => {
+                {/* Mostramos solo los primeros 5 para no llenar el inicio */}
+                {resumen.transacciones.slice(0, 5).map((t) => {
                   const titulo = t.descripcion || t.subcategoria || "Sin descripción";
                   const labelCategoria =
                     CATEGORIAS_EGRESOS.find((c) => c.id === t.categoria)?.label ||
@@ -242,7 +250,6 @@ export default function Home() {
         </>
       )}
 
-      {/* FAB MOVIDO A LA IZQUIERDA */}
       <button
         onClick={abrirNuevo}
         aria-label="Nuevo movimiento"

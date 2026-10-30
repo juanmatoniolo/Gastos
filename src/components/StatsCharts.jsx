@@ -1,16 +1,8 @@
 // src/components/StatsCharts.jsx
 "use client";
+import styles from "./StatsCharts.module.css";
 import {
-    PieChart,
-    Pie,
-    Cell,
-    BarChart,
-    Bar,
-    XAxis,
-    YAxis,
-    Tooltip,
-    ResponsiveContainer,
-    Legend,
+    PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { formatCurrency } from "@/utils/formatters";
 
@@ -22,9 +14,9 @@ const COLORES_TORTA = [
 function CustomTooltip({ active, payload }) {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-gray-800 border border-gray-600 p-3 rounded-lg shadow-xl">
-                <p className="text-gray-200 font-medium">{payload[0].name}</p>
-                <p className="text-white font-bold">{formatCurrency(payload[0].value)}</p>
+            <div className={styles.tooltip}>
+                <p className={styles.tooltipTitle}>{payload[0].name}</p>
+                <p className={styles.tooltipValue}>{formatCurrency(payload[0].value)}</p>
             </div>
         );
     }
@@ -33,15 +25,13 @@ function CustomTooltip({ active, payload }) {
 
 export default function StatsCharts({ dataTorta, dataBarras }) {
     return (
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-gray-800 p-5 rounded-2xl shadow-lg border border-gray-700">
-                <h3 className="text-md font-semibold text-gray-200 mb-4 text-center">
-                    ¿En qué se fue tu plata?
-                </h3>
+        <section className={styles.grid}>
+            <div className={styles.card}>
+                <h3 className={styles.title}>¿En qué se fue tu plata?</h3>
                 {dataTorta.length === 0 ? (
-                    <p className="text-gray-400 text-center py-10">No gastaste plata este mes.</p>
+                    <p className={styles.emptyState}>No gastaste plata este mes.</p>
                 ) : (
-                    <div className="h-72 w-full">
+                    <div className={styles.chartContainer}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
                                 <Pie
@@ -62,7 +52,7 @@ export default function StatsCharts({ dataTorta, dataBarras }) {
                                 <Legend
                                     verticalAlign="bottom"
                                     height={36}
-                                    formatter={(v) => <span className="text-gray-300 text-sm">{v}</span>}
+                                    formatter={(v) => <span style={{ color: "#d1d5db", fontSize: "0.875rem" }}>{v}</span>}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -70,11 +60,9 @@ export default function StatsCharts({ dataTorta, dataBarras }) {
                 )}
             </div>
 
-            <div className="bg-gray-800 p-5 rounded-2xl shadow-lg border border-gray-700">
-                <h3 className="text-md font-semibold text-gray-200 mb-4 text-center">
-                    Resumen General
-                </h3>
-                <div className="h-72 w-full">
+            <div className={styles.card}>
+                <h3 className={styles.title}>Resumen General</h3>
+                <div className={styles.chartContainer}>
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={dataBarras} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                             <XAxis dataKey="name" stroke="#9ca3af" tick={{ fill: "#9ca3af" }} axisLine={false} tickLine={false} />

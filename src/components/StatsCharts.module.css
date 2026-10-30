@@ -1,0 +1,62 @@
+/* src/components/StatsCharts.module.css */
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+    .grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.card {
+    background-color: #1f2937;
+    padding: 1.25rem;
+    border-radius: 1rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    border: 1px solid #374151;
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.chartContainer {
+    height: 300px;
+    width: 100%;
+}
+
+.emptyState {
+    color: #9ca3af;
+    text-align: center;
+    padding: 2.5rem 0;
+    font-size: 0.875rem;
+}
+
+.tooltip {
+    background-color: #1f2937;
+    border: 1px solid #4b5563;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.tooltipTitle {
+    color: #e5e7eb;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.tooltipValue {
+    color: #ffffff;
+    font-weight: 700;
+}

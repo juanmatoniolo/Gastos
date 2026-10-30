@@ -10,10 +10,9 @@ export default function Sidebar() {
 
     const links = [
         { href: "/", icon: "📊", label: "Dashboard" },
-        { href: "/movimientos", icon: "📝", label: "Movimientos" },
+        { href: "/actividad", icon: "📝", label: "Actividad" },
         { href: "/ahorros", icon: "💰", label: "Ahorros" },
         { href: "/estadisticas", icon: "📈", label: "Estadísticas" },
-        { href: "/fijos", icon: "📅", label: "Gastos Fijos" },
         { href: "/notas", icon: "🔐", label: "Bóveda" },
     ];
 

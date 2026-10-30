@@ -1,0 +1,404 @@
+/* src/components/FormularioTransaccion.module.css */
+.modalOverlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    /* Bottom sheet en mobile */
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+@media (min-width: 768px) {
+    .modalOverlay {
+        align-items: center;
+        padding: 1rem;
+    }
+}
+
+.modalContainer {
+    background-color: #1f2937;
+    border-radius: 1.5rem 1.5rem 0 0;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid #374151;
+    width: 100%;
+    max-width: 32rem;
+    max-height: 90dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+    .modalContainer {
+        border-radius: 1rem;
+        max-width: 36rem;
+    }
+}
+
+.header {
+    padding: 1.25rem;
+    border-bottom: 1px solid #374151;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    background-color: #1f2937;
+}
+
+.title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.backBtn {
+    background: none;
+    border: none;
+    color: #9ca3af;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: color 0.2s;
+}
+
+.backBtn:hover {
+    color: #ffffff;
+}
+
+.closeBtn {
+    color: #9ca3af;
+    background-color: #374151;
+    border-radius: 50%;
+    width: 2.25rem;
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    border: none;
+}
+
+.closeBtn:hover {
+    background-color: #4b5563;
+    color: white;
+}
+
+.body {
+    padding: 1.25rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .body {
+        padding: 2rem;
+    }
+}
+
+/* PASO 1: SELECCIÓN DE TIPO */
+.wizardGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 480px) {
+    .wizardGrid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.wizardCard {
+    background-color: #111827;
+    border: 1px solid #374151;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.wizardCard:hover {
+    border-color: #4b5563;
+    background-color: #1f2937;
+    transform: translateY(-2px);
+}
+
+.wizardCard.active {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.1);
+    box-shadow: 0 0 0 1px #3b82f6;
+}
+
+.wizardIcon {
+    font-size: 2.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.wizardTitle {
+    font-weight: 700;
+    color: white;
+    font-size: 1.125rem;
+    margin-bottom: 0.25rem;
+}
+
+.wizardDesc {
+    font-size: 0.75rem;
+    color: #9ca3af;
+    line-height: 1.4;
+}
+
+/* PASO 2: FORMULARIO */
+.formGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.montoBox {
+    background-color: rgba(17, 24, 39, 0.5);
+    padding: 1.25rem;
+    border-radius: 1rem;
+    border: 1px solid #374151;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #9ca3af;
+    text-transform: uppercase;
+    margin-left: 0.25rem;
+}
+
+.inputWrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.currencySymbol {
+    position: absolute;
+    left: 1rem;
+    color: #9ca3af;
+    font-weight: 700;
+    font-size: 1.25rem;
+    pointer-events: none;
+}
+
+.input {
+    width: 100%;
+    background-color: #374151;
+    color: white;
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #4b5563;
+    font-size: 1rem;
+    outline: none;
+    min-height: 3rem;
+}
+
+.input:focus {
+    border-color: #3b82f6;
+}
+
+.input.error {
+    border-color: #ef4444;
+}
+
+.inputLarge {
+    font-size: 1.5rem;
+    font-weight: 700;
+    padding-left: 2.5rem;
+}
+
+.inputNormal {
+    padding-left: 1rem;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 480px) {
+    .grid2 {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.select {
+    width: 100%;
+    background-color: #374151;
+    color: white;
+    padding: 0.875rem 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid #4b5563;
+    font-size: 1rem;
+    outline: none;
+    min-height: 3rem;
+    cursor: pointer;
+}
+
+.select:focus {
+    border-color: #3b82f6;
+}
+
+.btnSubmit {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-height: 3rem;
+    margin-top: 1rem;
+}
+
+.btnSubmit:active {
+    transform: scale(0.98);
+}
+
+.btnSubmit:disabled {
+    background-color: #4b5563;
+    cursor: not-allowed;
+}
+
+.btnSubmit.egreso {
+    background-color: #2563eb;
+}
+
+.btnSubmit.ingreso {
+    background-color: #16a34a;
+}
+
+.btnSubmit.cuotas {
+    background-color: #ea580c;
+}
+
+/* SUB CATEGORIA INLINE */
+.subcatInline {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.subcatInput {
+    flex: 1;
+    min-width: 0;
+    background-color: #374151;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid #3b82f6;
+    outline: none;
+    min-height: 3rem;
+}
+
+.btnSmall {
+    background-color: #2563eb;
+    color: white;
+    padding: 0 0.75rem;
+    border-radius: 0.75rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    min-height: 3rem;
+}
+
+.btnSmall.cancel {
+    background-color: #4b5563;
+}
+
+/* CUOTAS GRID */
+.cuotasGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.totalCuotaRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(234, 88, 12, 0.1);
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(234, 88, 12, 0.2);
+}
+
+.totalCuotaLabel {
+    font-size: 0.875rem;
+    color: #fdba74;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.inputTotalCuota {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(234, 88, 12, 0.3);
+    color: #fb923c;
+    font-weight: 700;
+    font-size: 1.25rem;
+    text-align: right;
+    width: 8rem;
+    padding-right: 0.25rem;
+    outline: none;
+}
+
+.inputTotalCuota:focus {
+    border-bottom-color: #ea580c;
+}
+
+/* ALERTA SALDO */
+.balanceInfo {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin-top: 0.5rem;
+}
+
+.balanceAmount {
+    font-weight: 700;
+    color: #4ade80;
+}
+
+.balanceAmount.danger {
+    color: #f87171;
+}
+
+.balanceWarning {
+    display: block;
+    color: #f87171;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
