@@ -31,6 +31,7 @@ export default function Home() {
   const [showTransferModal, setShowTransferModal] = useState(false);
   const [transfiriendo, setTransfiriendo] = useState(false);
 
+  // Resumen calculado con getResumenMes
   const resumen = useMemo(
     () => getResumenMes(transacciones || [], mesSeleccionado),
     [transacciones, mesSeleccionado]
@@ -130,7 +131,6 @@ export default function Home() {
               </p>
             </div>
 
-            {/* TARJETA DE BALANCE CON BOTÓN DE ARRASTRE */}
             <div className="bg-gradient-to-br from-blue-600 to-indigo-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -mr-10 -mt-10" />
               <div>
@@ -242,10 +242,11 @@ export default function Home() {
         </>
       )}
 
+      {/* FAB MOVIDO A LA IZQUIERDA */}
       <button
         onClick={abrirNuevo}
         aria-label="Nuevo movimiento"
-        className="md:hidden fixed right-5 z-40 w-16 h-16 bg-blue-600 rounded-full shadow-2xl flex items-center justify-center text-white text-3xl border-4 border-gray-900 active:scale-[0.97] transition-transform"
+        className="md:hidden fixed left-5 z-40 w-14 h-14 bg-blue-600 rounded-full shadow-2xl flex items-center justify-center text-white text-3xl border-4 border-gray-900 active:scale-[0.97] transition-transform"
         style={{ bottom: "calc(env(safe-area-inset-bottom) + 5.5rem)" }}
       >
         +
@@ -266,6 +267,7 @@ export default function Home() {
               transaccionAEditar={transaccionAEditar}
               transacciones={transacciones}
               mesSeleccionado={mesSeleccionado}
+              saldoDisponible={resumen.balance}
             />
           </div>
         </div>
@@ -281,7 +283,6 @@ export default function Home() {
         ]}
       />
 
-      {/* MODAL DE CONFIRMACIÓN PARA PASAR SALDO */}
       <ConfirmSheet
         open={showTransferModal}
         title="Pasar saldo al próximo mes"

@@ -17,6 +17,7 @@ export default function FormularioTransaccion({
     transaccionAEditar,
     transacciones,
     mesSeleccionado,
+    saldoDisponible = 0, // NUEVO PROP
 }) {
     const isEditingVirtual =
         transaccionAEditar?.id?.includes("rec-") ||
@@ -83,8 +84,16 @@ export default function FormularioTransaccion({
     const permiteRecurrencia =
         formData.tipo === "ingreso" ||
         (formData.tipo === "egreso" && !esAhorro);
+
     const montoNumericoPreview = parseInputNumber(formData.montoStr);
     const puedeGuardar = montoNumericoPreview > 0 && !!userId && !cargando;
+
+    // Alerta si el gasto supera el saldo (solo aplica a egresos nuevos)
+    const superaSaldo =
+        !isEditingReal &&
+        formData.tipo === "egreso" &&
+        !esAhorro &&
+        montoNumericoPreview > saldoDisponible;
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -251,23 +260,35 @@ export default function FormularioTransaccion({
     return (
         <div className="bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 w-full max-w-md md:max-w-xl mx-auto max-h-[85dvh] flex flex-col overflow-hidden">
             {/* HEADER FIJO */}
-            <div className="flex justify-between items-center bg-gray-800 px-5 md:px-8 pt-5 md:pt-8 pb-4 shrink-0 border-b border-gray-700/50">
-                <h2 className="text-xl font-bold text-white">
-                    {isEditingReal || isEditingVirtual
-                        ? "Editar Movimiento"
-                        : "Anotar Movimiento"}
-                </h2>
-                {onClose && (
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        aria-label="Cerrar"
-                        className="text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-full w-11 h-11 flex items-center justify-center transition active:scale-[0.97]"
-                    >
-                        <span aria-hidden="true" className="text-2xl leading-none">
-                            ×
+            <div className="flex flex-col bg-gray-800 px-5 md:px-8 pt-5 md:pt-8 pb-4 shrink-0 border-b border-gray-700/50">
+                <div className="flex justify-between items-center mb-2">
+                    <h2 className="text-xl font-bold text-white">
+                        {isEditingReal || isEditingVirtual
+                            ? "Editar Movimiento"
+                            : "Anotar Movimiento"}
+                    </h2>
+                    {onClose && (
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            aria-label="Cerrar"
+                            className="text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-full w-11 h-11 flex items-center justify-center transition active:scale-[0.97]"
+                        >
+                            <span aria-hidden="true" className="text-2xl leading-none">
+                                ×
+                            </span>
+                        </button>
+                    )}
+                </div>
+                {/* INDICADOR DE SALDO */}
+                {!isEditingReal && !isEditingVirtual && formData.tipo === "egreso" && (
+                    <div className="text-sm font-medium text-gray-400 mt-1">
+                        Saldo disponible:{" "}
+                        <span className={superaSaldo ? "text-red-400 font-bold" : "text-green-400 font-bold"}>
+                            ${formatInputNumber(saldoDisponible.toFixed(2).replace(".", ","))}
                         </span>
-                    </button>
+                        {superaSaldo && <span className="block text-red-400 text-xs mt-1">⚠️ Ojo, este gasto supera tu saldo.</span>}
+                    </div>
                 )}
             </div>
 
@@ -421,7 +442,8 @@ export default function FormularioTransaccion({
                                         placeholder="0"
                                         value={formData.montoStr}
                                         onChange={handleMontoTotalChange}
-                                        className="w-full bg-gray-700 text-white pl-10 pr-4 py-3.5 rounded-xl border border-gray-600 focus:border-blue-500 text-2xl font-bold outline-none text-base min-h-12"
+                                        className={`w-full bg-gray-700 text-white pl-10 pr-4 py-3.5 rounded-xl border text-2xl font-bold outline-none text-base min-h-12 transition-colors ${superaSaldo ? "border-red-500 focus:border-red-500" : "border-gray-600 focus:border-blue-500"
+                                            }`}
                                         required
                                     />
                                 </div>

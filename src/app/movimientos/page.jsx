@@ -10,6 +10,7 @@ import FormularioTransaccion from "@/components/FormularioTransaccion";
 import MonthPicker from "@/components/MonthPicker";
 import { formatCurrency } from "@/utils/formatters";
 import { CATEGORIAS_EGRESOS, CATEGORIAS_INGRESOS } from "@/utils/constantes";
+import { getResumenMes } from "@/utils/proyecciones";
 
 export default function Movimientos() {
     const { user } = useAuth();
@@ -20,6 +21,12 @@ export default function Movimientos() {
     const [transaccionAEditar, setTransaccionAEditar] = useState(null);
     const [transaccionAEliminar, setTransaccionAEliminar] = useState(null);
     const [filtroMes, setFiltroMes] = useState(new Date().toISOString().slice(0, 7));
+
+    // Obtenemos el saldo del mes para pasarlo al form
+    const resumenDelMes = useMemo(
+        () => getResumenMes(transacciones || [], filtroMes),
+        [transacciones, filtroMes]
+    );
 
     const movimientosOrdenados = useMemo(() => {
         const reales = transacciones.filter((t) => !t.esRecurrenteVirtual && !t.esCuotaVirtual);
@@ -207,6 +214,7 @@ export default function Movimientos() {
                             transaccionAEditar={transaccionAEditar}
                             transacciones={transacciones}
                             mesSeleccionado={filtroMes}
+                            saldoDisponible={resumenDelMes.balance}
                         />
                     </div>
                 </div>
