@@ -31,7 +31,7 @@ export default function Sidebar() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all min-h-11 ${isActive
                                 ? "bg-blue-600 text-white font-medium shadow-md"
                                 : "text-gray-400 hover:bg-gray-700 hover:text-white"
                                 }`}
@@ -45,7 +45,7 @@ export default function Sidebar() {
 
             <button
                 onClick={logout}
-                className="mt-auto bg-gray-700 hover:bg-red-900/50 text-red-400 p-3 rounded-xl transition-colors font-medium flex items-center justify-center gap-2"
+                className="mt-auto bg-gray-700 hover:bg-red-900/50 text-red-400 p-3 rounded-xl transition-colors font-medium flex items-center justify-center gap-2 min-h-11"
             >
                 Cerrar Sesión
             </button>
