@@ -18,25 +18,29 @@ export default function LoginView() {
         setError("");
         setBtnLoading(true);
         try {
-            if (isRegister) await registro(email, password);
-            else await login(email, password);
+            if (isRegister) {
+                if (password.length < 6) throw new Error("La contraseña debe tener al menos 6 caracteres.");
+                await registro(email, password);
+            } else {
+                await login(email, password);
+            }
         } catch (err) {
             if (err.code === "auth/invalid-credential") setError("Correo o contraseña incorrectos.");
-            else if (err.code === "auth/email-already-in-use") setError("El correo ya está registrado.");
+            else if (err.code === "auth/email-already-in-use") setError("El correo ya está registrado. Intenta iniciar sesión.");
             else if (err.code === "auth/weak-password") setError("La contraseña debe tener al menos 6 caracteres.");
-            else setError("Ocurrió un error. Intenta de nuevo.");
+            else if (err.code === "auth/operation-not-allowed") setError("El registro por correo está deshabilitado en Firebase.");
+            else setError(err.message || "Ocurrió un error. Intenta de nuevo.");
         } finally {
             setBtnLoading(false);
         }
     };
 
     return (
-        // Fondo del color exacto que pasaste
         <div className="w-full min-h-dvh bg-[#289FA7] flex flex-col justify-center items-center pt-safe pb-safe">
 
             <div className="w-full max-w-md flex flex-col">
-                {/* IMAGEN SIN SOMBRAS NI MARCOS PARA QUE SE FUSIONE */}
-                <div className="w-full px-4 mb-4">
+                {/* IMAGEN INTEGRADA AL FONDO */}
+                <div className="w-full px-4 mb-6">
                     <div className="relative w-full aspect-[16/9]">
                         <Image
                             src="/og-image.png"
@@ -49,7 +53,7 @@ export default function LoginView() {
                     </div>
                 </div>
 
-                {/* FORMULARIO AZUL OSCURO (Ajustado con un poquito de margen) */}
+                {/* FORMULARIO */}
                 <div className="w-full px-4">
                     <form
                         onSubmit={handleAuth}
@@ -67,7 +71,7 @@ export default function LoginView() {
 
                         <input
                             type="email"
-                            placeholder="Correo"
+                            placeholder="Correo electrónico"
                             autoComplete="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -92,12 +96,14 @@ export default function LoginView() {
                             {btnLoading ? "Cargando..." : isRegister ? "Registrarse" : "Entrar"}
                         </button>
 
+                        {/* SEPARADOR */}
                         <div className="flex items-center gap-3 my-1">
                             <hr className="flex-1 border-gray-600" />
                             <span className="text-gray-400 text-xs font-medium uppercase">O</span>
                             <hr className="flex-1 border-gray-600" />
                         </div>
 
+                        {/* BOTÓN DE GOOGLE */}
                         <button
                             type="button"
                             onClick={loginConGoogle}
@@ -109,21 +115,24 @@ export default function LoginView() {
                                 <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
                                 <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
                             </svg>
-                            Google
+                            Continuar con Google
                         </button>
 
-                        <button
-                            type="button"
-                            onClick={() => {
-                                setIsRegister(!isRegister);
-                                setError("");
-                            }}
-                            className="text-sm text-gray-400 mt-2 hover:text-white text-center transition-colors min-h-11"
-                        >
-                            {isRegister
-                                ? "¿Ya tienes cuenta? Inicia sesión"
-                                : "¿No tienes cuenta? Regístrate"}
-                        </button>
+                        {/* TOGGLE PARA CAMBIAR ENTRE LOGIN Y REGISTRO */}
+                        <div className="text-center mt-2">
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setIsRegister(!isRegister);
+                                    setError("");
+                                }}
+                                className="text-sm text-gray-400 hover:text-white transition-colors"
+                            >
+                                {isRegister
+                                    ? "¿Ya tienes cuenta? Inicia sesión"
+                                    : "¿No tienes cuenta? Regístrate aquí"}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </div>

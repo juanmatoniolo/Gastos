@@ -1,4 +1,4 @@
-// src/context/AuthContext.jsx
+// src/context/AuthContext.js
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 import {
@@ -9,41 +9,55 @@ import {
     GoogleAuthProvider,
     signInWithPopup
 } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { ref, set } from "firebase/database";
+import { auth, database } from "@/lib/firebase";
 
 const AuthContext = createContext();
-
-export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
             setLoading(false);
         });
         return () => unsubscribe();
     }, []);
 
-    const login = (email, password) => signInWithEmailAndPassword(auth, email, password);
-    const registro = (email, password) => createUserWithEmailAndPassword(auth, email, password);
-    const logout = () => signOut(auth);
+    const registro = async (email, password) => {
+        // 1. Creamos el usuario en Firebase Auth
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const nuevoUsuario = userCredential.user;
 
-    const loginConGoogle = async () => {
+        // 2. Lo guardamos en la Base de Datos (Realtime Database)
+        await set(ref(database, `usuarios/${nuevoUsuario.uid}`), {
+            email: nuevoUsuario.email,
+            creadoEl: new Date().toISOString(),
+        });
+
+        return nuevoUsuario;
+    };
+
+    const login = (email, password) => {
+        return signInWithEmailAndPassword(auth, email, password);
+    };
+
+    const loginConGoogle = () => {
         const provider = new GoogleAuthProvider();
-        try {
-            await signInWithPopup(auth, provider);
-        } catch (error) {
-            console.error("Error al iniciar sesión con Google:", error);
-            alert("No se pudo iniciar sesión con Google.");
-        }
+        return signInWithPopup(auth, provider);
+    };
+
+    const logout = () => {
+        return signOut(auth);
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, registro, logout, loginConGoogle, loading }}>
-            {children} {/* <-- Cambiado: Ahora siempre renderiza los hijos */}
+        <AuthContext.Provider value={{ user, loading, registro, login, loginConGoogle, logout }}>
+            {children}
         </AuthContext.Provider>
     );
 }
+
+export const useAuth = () => useContext(AuthContext);
