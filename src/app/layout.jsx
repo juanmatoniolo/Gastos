@@ -4,28 +4,42 @@ import { ToastProvider } from "@/components/Toast";
 import AppShell from "@/components/AppShell";
 import "./globals.css";
 
+const APP_URL = "https://liberta-de-gastos-omega.vercel.app";
+const OG_IMAGE_URL = `${APP_URL}/og-image.png`; // URL absoluta directa
+
 export const metadata = {
-  metadataBase: new URL("https://liberta-de-gastos-omega.vercel.app"),
+  metadataBase: new URL(APP_URL),
   title: {
     default: "Mis Finanzas | Control de Gastos",
     template: "%s | Mis Finanzas",
   },
   description:
     "Lleva el control absoluto de tus ingresos, egresos, ahorros y cuotas de tarjetas de crédito.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     locale: "es_AR",
-    url: "/",
+    url: APP_URL, // URL absoluta
     title: "Mis Finanzas | Control de Gastos",
     description: "Toma el control de tu dinero con estadísticas, control de cuotas y proyecciones.",
     siteName: "Mis Finanzas",
-    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Mis Finanzas - Dashboard" }],
+    images: [
+      {
+        url: OG_IMAGE_URL, // URL absoluta directa
+        width: 1200,
+        height: 630,
+        alt: "Mis Finanzas - Dashboard",
+        type: "image/png",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Mis Finanzas | Control de Gastos",
     description: "Toma el control de tu dinero con estadísticas y proyecciones.",
-    images: ["/og-image.png"],
+    images: [OG_IMAGE_URL], // URL absoluta directa
   },
   icons: {
     icon: [
@@ -36,7 +50,10 @@ export const metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-  appleWebApp: { title: "Mis Finanzas", statusBarStyle: "black-translucent" },
+  appleWebApp: {
+    title: "Mis Finanzas",
+    statusBarStyle: "black-translucent"
+  },
   manifest: "/manifest.json",
 };
 
