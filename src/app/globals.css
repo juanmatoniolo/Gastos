@@ -180,3 +180,46 @@ input[type="number"] {
 .custom-popper {
   z-index: 100 !important;
 }
+
+/* …dejá TODO lo que ya tenías… */
+
+/* --- Animaciones para Toast y ConfirmSheet --- */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.2s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .animate-fade-in-up,
+  .animate-fade-in-down {
+    animation: none;
+  }
+}

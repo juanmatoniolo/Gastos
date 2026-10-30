@@ -1,5 +1,6 @@
 // src/app/layout.jsx
 import { AuthProvider } from "@/context/AuthContext";
+import { ToastProvider } from "@/components/Toast";
 import AppShell from "@/components/AppShell";
 import "./globals.css";
 
@@ -16,17 +17,9 @@ export const metadata = {
     locale: "es_AR",
     url: "/",
     title: "Mis Finanzas | Control de Gastos",
-    description:
-      "Toma el control de tu dinero con estadísticas, control de cuotas y proyecciones.",
+    description: "Toma el control de tu dinero con estadísticas, control de cuotas y proyecciones.",
     siteName: "Mis Finanzas",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Mis Finanzas - Dashboard",
-      },
-    ],
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Mis Finanzas - Dashboard" }],
   },
   twitter: {
     card: "summary_large_image",
@@ -43,10 +36,7 @@ export const metadata = {
     shortcut: "/favicon.ico",
     apple: "/apple-touch-icon.png",
   },
-  appleWebApp: {
-    title: "Mis Finanzas",
-    statusBarStyle: "black-translucent",
-  },
+  appleWebApp: { title: "Mis Finanzas", statusBarStyle: "black-translucent" },
   manifest: "/manifest.json",
 };
 
@@ -60,12 +50,11 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="es" className="h-full antialiased">
-      <body
-        className="bg-gray-900 text-gray-100 min-h-dvh"
-        suppressHydrationWarning
-      >
+      <body className="bg-gray-900 text-gray-100 min-h-dvh" suppressHydrationWarning>
         <AuthProvider>
-          <AppShell>{children}</AppShell>
+          <ToastProvider>
+            <AppShell>{children}</AppShell>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

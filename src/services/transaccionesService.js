@@ -75,3 +75,41 @@ export const eliminarTransaccion = async (userId, transaccionId) => {
 	);
 	await remove(transaccionRef);
 };
+
+// NUEVA FUNCIÓN: Pasar saldo al mes siguiente
+export const transferirSaldoMesSiguiente = async (
+	userId,
+	monto,
+	mesActual,
+	mesSiguiente,
+) => {
+	// 1. Egreso en el mes actual (último día del mes)
+	const [anio, mes] = mesActual.split("-").map(Number);
+	const lastDay = new Date(anio, mes, 0).getDate();
+	const fechaEgreso = `${mesActual}-${lastDay.toString().padStart(2, "0")}`;
+
+	await agregarTransaccion(userId, {
+		tipo: "egreso",
+		monto: monto,
+		fecha: fechaEgreso,
+		categoria: "otro",
+		subcategoria: "Arrastre de saldo",
+		descripcion: `Arrastre de saldo a ${mesSiguiente}`,
+		metodoPago: "efectivo",
+		esRecurrente: false,
+	});
+
+	// 2. Ingreso en el mes siguiente (primer día del mes)
+	const fechaIngreso = `${mesSiguiente}-01`;
+
+	await agregarTransaccion(userId, {
+		tipo: "ingreso",
+		monto: monto,
+		fecha: fechaIngreso,
+		categoria: "otro_ingreso",
+		subcategoria: "Arrastre de saldo",
+		descripcion: `Saldo arrastrado de ${mesActual}`,
+		metodoPago: "transferencia",
+		esRecurrente: false,
+	});
+};
